@@ -34,7 +34,10 @@ int main()
     // for (int i = 0; i < CPU_USE_COUNT; i++)
     //     printf("%s ", b[i]);
 
-    printf("mem : %f", get_memory_use());
+    printf("mem : %f\n", get_memory_use());
+
+    printf("all pr : %d\n", get_all_process_number());
+    printf("run pr : %d\n", get_run_process_number());
 
     return 0;
 }

@@ -143,7 +143,7 @@ float get_memory_use()
         fgets(str, sizeof(str), file);
         strtok(str, " \t");
         mem_strs[i] = strtok(NULL, " \t");
-        printf("%s\n", mem_strs[i]);
+        // printf("%s\n", mem_strs[i]);
         mem_strs_res[i] = (char *)malloc(strlen(mem_strs));
         strcpy(mem_strs_res[i], mem_strs[i]);
     }
@@ -151,6 +151,22 @@ float get_memory_use()
     float mem_total = atof(mem_strs_res[0]);
     float mem_free = atof(mem_strs_res[1]);
     return (mem_total - mem_free) / mem_total;
+}
+
+int get_all_process_number()
+{
+    char path[256];
+    strcpy(path, proc_dir);
+    strcat(path, stat_file);
+    return atoi(key_value_parser("processes", path));
+}
+
+int get_run_process_number()
+{
+    char path[256];
+    strcpy(path, proc_dir);
+    strcat(path, stat_file);
+    return atoi(key_value_parser("procs_running", path));
 }
 
 //------------------------------------------------------------

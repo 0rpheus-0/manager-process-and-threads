@@ -203,6 +203,26 @@ long get_active_jiffies()
     return get_jiffies() - get_idle_jiffies();
 }
 
+long get_active_jiffies_proc(int pid)
+{
+    char path[256];
+    char num[7];
+    sprintf(num, "%d", pid);
+    strcpy(path, proc_dir);
+    strcat(path, num);
+    strcat(path, stat_file);
+    FILE *file = fopen(path, "r");
+    char str[256] = {0};
+    fgets(str, sizeof(str), file);
+    strtok(str, " ");
+    for (int i = 0; i < 13; i++)
+        strtok(NULL, " ");
+    char *utime = strtok(NULL, " ");
+    char *stime = strtok(NULL, " ");
+    fclose(file);
+    return strtol(utime, NULL, 10) + strtol(stime, NULL, 10);
+}
+
 //------------------------------------------------------------
 struct pids
 {

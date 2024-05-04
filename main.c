@@ -41,6 +41,7 @@ int main()
     printf("jiffies   : %ld\n", get_jiffies());
     printf("jiffies i : %ld\n", get_idle_jiffies());
     printf("jiffies a : %ld\n", get_active_jiffies());
+    printf("jiffies p : %ld\n", get_active_jiffies_proc(1));
 
     return 0;
 }

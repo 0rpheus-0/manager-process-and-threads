@@ -169,6 +169,19 @@ int get_run_process_number()
     return atoi(key_value_parser("procs_running", path));
 }
 
+long get_up_time()
+{
+    char path[256];
+    strcpy(path, proc_dir);
+    strcat(path, uptime_file);
+    FILE *file = fopen(path, "r");
+    char str[256] = {0};
+    fgets(str, sizeof(str), file);
+    char *time = strtok(str, ".");
+    fclose(file);
+    return strtol(time, NULL, 10);
+}
+
 //------------------------------------------------------------
 struct pids
 {

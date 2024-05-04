@@ -39,5 +39,7 @@ int main()
     printf("all pr : %d\n", get_all_process_number());
     printf("run pr : %d\n", get_run_process_number());
 
+    printf("Up time %s\n", format_time(get_up_time()));
+
     return 0;
 }

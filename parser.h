@@ -87,6 +87,25 @@ char *get_operaring_system()
     return value_res;
 }
 
+char *get_kernel()
+{
+    char *kernel = NULL;
+    char *kernel_res = NULL;
+    char path[256];
+    strcpy(path, proc_dir);
+    strcat(path, version_file);
+    FILE *file = fopen(path, "r");
+    char str[256] = {0};
+    fgets(str, sizeof(str), file);
+    strtok(str, " ");
+    strtok(NULL, " ");
+    kernel = strtok(NULL, " ");
+    kernel_res = (char *)malloc(strlen(kernel));
+    strcpy(kernel_res, kernel);
+    fclose(file);
+    return kernel_res;
+}
+
 //------------------------------------------------------------
 struct pids
 {

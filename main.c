@@ -29,6 +29,7 @@ int main()
     //        proc.pid, proc.user, proc.command, proc.cpu_use, proc.ram, proc.up_time, proc.state);
 
     printf("OS : %s\n", get_operaring_system());
+    printf("kernel : %s\n", get_kernel());
 
     return 0;
 }

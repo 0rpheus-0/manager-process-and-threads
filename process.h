@@ -13,13 +13,18 @@ struct process
     char *state;
 };
 
+float get_cpu_use_proc(int pid)
+{
+    return get_active_jiffies_proc(pid) / get_active_jiffies();
+}
+
 struct process process_init(int pid)
 {
     struct process proc = {
         .pid = pid,
         .user = get_user(pid),
         .command = get_command(pid),
-        .cpu_use = 0, // это пока
+        .cpu_use = get_cpu_use_proc(pid),
         .ram = get_ram(pid),
         .time = get_time(pid),
         .state = get_state(pid)};

@@ -30,6 +30,9 @@ int main()
 
     printf("OS : %s\n", get_operaring_system());
     printf("kernel : %s\n", get_kernel());
+    char **b = get_cpu_use();
+    for (int i = 0; i < CPU_USE_COUNT; i++)
+        printf("%s ", b[i]);
 
     return 0;
 }

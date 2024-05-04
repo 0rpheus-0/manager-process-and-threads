@@ -106,6 +106,29 @@ char *get_kernel()
     return kernel_res;
 }
 
+#define CPU_USE_COUNT 10
+
+char **get_cpu_use()
+{
+    char **cpu = (char **)malloc(CPU_USE_COUNT * sizeof(char *));
+    char **cpu_res = (char **)malloc(CPU_USE_COUNT * sizeof(char *));
+    char path[256];
+    strcpy(path, proc_dir);
+    strcat(path, stat_file);
+    FILE *file = fopen(path, "r");
+    char str[256] = {0};
+    fgets(str, sizeof(str), file);
+    strtok(str, " ");
+    for (int i = 0; i < CPU_USE_COUNT; i++)
+    {
+        cpu[i] = strtok(NULL, " ");
+        cpu_res[i] = (char *)malloc(strlen(cpu));
+        strcpy(cpu_res[i], cpu[i]);
+    }
+    fclose(file);
+    return cpu_res;
+}
+
 //------------------------------------------------------------
 struct pids
 {

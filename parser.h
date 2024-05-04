@@ -20,6 +20,7 @@ char *passwd_path = "/etc/passwd";
 char *key_value_parser(char *key, char *path)
 {
     char *value = NULL;
+    char *value_res = NULL;
     int search = 1;
     FILE *file = fopen(path, "r");
     // printf("aboba kv %s\n", path); // убрать
@@ -37,14 +38,16 @@ char *key_value_parser(char *key, char *path)
             // printf("in if\n");
             strtok(str, " \t\n");
             value = strtok(NULL, " \t\n");
-            printf("%s\n", value);
+            // printf("%s\n", value);
+            value_res = (char *)malloc(strlen(value));
+            strcpy(value_res, value);
             //    printf("str %s\n", str);
             search = 0;
         }
     }
     fclose(file);
     // printf("f %s \n", value);
-    return value;
+    return value_res;
 }
 
 char *format_time(long time)
@@ -55,7 +58,7 @@ char *format_time(long time)
     int sec = time % HOUR;
     int min = sec / MIN;
     sec %= MIN;
-    char *result = (char *)malloc(9 * sizeof(char));
+    char *result = (char *)malloc(9);
     snprintf(result, 9, "%02d:%02d:%02d", h, min, sec);
     return result;
 }
@@ -103,26 +106,32 @@ char *get_uid(int pid)
 char *get_user(int pid)
 {
     char *user = NULL;
+    char *user_res = NULL;
     // char *uid = get_uid(pid); //ивану вопрос
     char *uid_temp = NULL;
     int serch = 1;
     FILE *file = fopen(passwd_path, "r");
     while (!feof(file) && serch)
     {
-        char *uid = get_uid(pid);
         char str[256] = {0};
         fgets(str, sizeof(str), file);
         user = strtok(str, ":");
         strtok(NULL, ":");
         uid_temp = strtok(NULL, ":");
+        char *uid = get_uid(pid);
+        // printf("%s\t%s\t%s\n", user, uid_temp, uid);
         if (strcmp(uid_temp, uid) == 0)
+        {
+            user_res = (char *)malloc(strlen(user));
+            strcpy(user_res, user);
             serch = 0;
+        }
     }
     fclose(file);
-    return user;
+    return user_res;
 }
 
-char *get_ram(int pid)
+long get_ram(int pid)
 {
     char path[256];
     char num[7];
@@ -131,7 +140,9 @@ char *get_ram(int pid)
     strcat(path, num);
     strcat(path, status_file);
     // printf("%s\n", path); // убрать
-    return key_value_parser("VmSize:", path);
+    char *ram_str = key_value_parser("VmSize:", path);
+    long ram = strtol(ram_str, NULL, 10) / 1000;
+    return ram;
 }
 
 long get_up_time(int pid)
@@ -146,7 +157,7 @@ long get_up_time(int pid)
     FILE *file = fopen(path, "r");
     char str[256] = {0};
     fgets(str, sizeof(str), file);
-    printf("%s", str);
+    // printf("%s", str);
     strtok(str, " ");
     for (int i = 0; i < 21; i++)
         strtok(NULL, " ");
@@ -170,6 +181,9 @@ char *get_command(int pid)
     fgets(str, sizeof(str), file);
     char *command = strtok(str, " \n");
     fclose(file);
+    char *command_res = (char *)malloc(strlen(command));
+    strcpy(command_res, command);
     // printf("%s\n", str);
-    return command;
+    // printf("cmd %s\n", command);
+    return command_res;
 }

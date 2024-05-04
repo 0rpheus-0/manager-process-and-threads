@@ -6,15 +6,20 @@ struct process
 {
     int pid;
     char *user;
-    char *command;
     float cpu_use;
-    char *ram;
+    long ram;
     long up_time;
+    char *command;
 };
 
-// float get_cpu_use(int pit) {}
-
-char *get_ram_mb(int pid)
+struct process process_init(int pid)
 {
-    int kbytes = atoi(get_ram(pid));
+    struct process proc = {
+        .pid = pid,
+        .user = get_user(pid),
+        .command = get_command(pid),
+        .cpu_use = 0, // это пока
+        .ram = get_ram(pid),
+        .up_time = get_up_time(pid)};
+    return proc;
 }

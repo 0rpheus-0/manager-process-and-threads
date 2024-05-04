@@ -12,10 +12,10 @@ char *cpuinfo_file = "/cpuinfo";
 char *status_file = "/status";
 char *stat_file = "/stat";
 char *uptime_file = "/uptime";
-char *meminfo_file = "/meminfo";
 char *os_path = "/etc/os-release";
 char *passwd_path = "/etc/passwd";
 char *version_file = "/version";
+char *meminfo_file = "/meminfo";
 
 char *key_value_parser(char *key, char *path)
 {
@@ -127,6 +127,30 @@ char **get_cpu_use()
     }
     fclose(file);
     return cpu_res;
+}
+
+float get_memory_use()
+{
+    char **mem_strs = (char **)malloc(2 * sizeof(char *));
+    char **mem_strs_res = (char **)malloc(2 * sizeof(char *));
+    char path[256];
+    strcpy(path, proc_dir);
+    strcat(path, meminfo_file);
+    FILE *file = fopen(path, "r");
+    for (int i = 0; i < 2; i++)
+    {
+        char str[256] = {0};
+        fgets(str, sizeof(str), file);
+        strtok(str, " \t");
+        mem_strs[i] = strtok(NULL, " \t");
+        printf("%s\n", mem_strs[i]);
+        mem_strs_res[i] = (char *)malloc(strlen(mem_strs));
+        strcpy(mem_strs_res[i], mem_strs[i]);
+    }
+    fclose(file);
+    float mem_total = atof(mem_strs_res[0]);
+    float mem_free = atof(mem_strs_res[1]);
+    return (mem_total - mem_free) / mem_total;
 }
 
 //------------------------------------------------------------

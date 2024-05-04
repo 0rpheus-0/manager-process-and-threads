@@ -13,9 +13,9 @@ char *status_file = "/status";
 char *stat_file = "/stat";
 char *uptime_file = "/uptime";
 char *meminfo_file = "/meminfo";
-char *version_file = "/version";
 char *os_path = "/etc/os-release";
 char *passwd_path = "/etc/passwd";
+char *version_file = "/version";
 
 char *key_value_parser(char *key, char *path)
 {
@@ -62,7 +62,32 @@ char *format_time(long time)
     snprintf(result, 9, "%02d:%02d:%02d", h, min, sec);
     return result;
 }
+//------------------------------------------------------------
 
+char *get_operaring_system()
+{
+    char *value = NULL;
+    char *value_res = NULL;
+    int search = 1;
+    FILE *file = fopen(os_path, "r");
+    while (!feof(file) && search)
+    {
+        char str[256] = {0};
+        fgets(str, sizeof(str), file);
+        if (strncmp("PRETTY_NAME", str, 11) == 0)
+        {
+            strtok(str, "=");
+            value = strtok(NULL, "\n");
+            value_res = (char *)malloc(strlen(value));
+            strcpy(value_res, value);
+            search = 0;
+        }
+    }
+    fclose(file);
+    return value_res;
+}
+
+//------------------------------------------------------------
 struct pids
 {
     int *pids;
@@ -145,7 +170,7 @@ long get_ram(int pid)
     return ram;
 }
 
-long get_up_time(int pid)
+long get_time(int pid)
 {
     // long ticks = 0;
     char path[256];
@@ -186,4 +211,16 @@ char *get_command(int pid)
     // printf("%s\n", str);
     // printf("cmd %s\n", command);
     return command_res;
+}
+
+char *get_state(int pid)
+{
+    char path[256];
+    char num[7];
+    sprintf(num, "%d", pid);
+    strcpy(path, proc_dir);
+    strcat(path, num);
+    strcat(path, status_file);
+    // printf("%s\n", path); // убрать
+    return key_value_parser("State:", path);
 }

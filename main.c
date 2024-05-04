@@ -24,9 +24,11 @@ int main()
     // printf("gc %s\n", get_command(4483));
 
     // printf("aboba\n");
-    struct process proc = process_init(7050);
-    printf("pid : %d\nuser : %s\ncmd : %s\ncpu : %f\nram : %ld\ntime : %ld\n",
-           proc.pid, proc.user, proc.command, proc.cpu_use, proc.ram, proc.up_time);
+    // struct process proc = process_init(1);
+    // printf("pid : %d\nuser : %s\ncmd : %s\ncpu : %f\nram : %ld\ntime : %ld\nstate %s\n",
+    //        proc.pid, proc.user, proc.command, proc.cpu_use, proc.ram, proc.up_time, proc.state);
+
+    printf("OS : %s\n", get_operaring_system());
 
     return 0;
 }

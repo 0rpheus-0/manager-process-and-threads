@@ -8,8 +8,9 @@ struct process
     char *user;
     float cpu_use;
     long ram;
-    long up_time;
+    long time;
     char *command;
+    char *state;
 };
 
 struct process process_init(int pid)
@@ -20,6 +21,7 @@ struct process process_init(int pid)
         .command = get_command(pid),
         .cpu_use = 0, // это пока
         .ram = get_ram(pid),
-        .up_time = get_up_time(pid)};
+        .time = get_time(pid),
+        .state = get_state(pid)};
     return proc;
 }

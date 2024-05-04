@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "process.h"
 #include "parser.h"
+#include "cpu.h"
 
 int main()
 {
@@ -24,24 +25,28 @@ int main()
     // printf("gc %s\n", get_command(4483));
 
     // printf("aboba\n");
-    struct process proc = process_init(9886);
-    printf("pid : %d\nuser : %s\ncmd : %s\ncpu : %f\nram : %ld\ntime : %ld\nstate %s\n",
-           proc.pid, proc.user, proc.command, proc.cpu_use, proc.ram, proc.time, proc.state);
+    // struct process proc = process_init(9886);
+    // printf("pid : %d\nuser : %s\ncmd : %s\ncpu : %f\nram : %ld\ntime : %ld\nstate %s\n",
+    //        proc.pid, proc.user, proc.command, proc.cpu_use, proc.ram, proc.time, proc.state);
 
-    printf("OS : %s\n", get_operaring_system());
-    printf("kernel : %s\n", get_kernel());
-    // char **b = get_cpu_use();
-    // for (int i = 0; i < CPU_USE_COUNT; i++)
-    //     printf("%s ", b[i]);
-    printf("mem : %f\n", get_memory_use());
-    printf("all pr : %d\n", get_all_process_number());
-    printf("run pr : %d\n", get_run_process_number());
-    printf("Up time %s\n", format_time(get_up_time()));
+    // printf("OS : %s\n", get_operaring_system());
+    // printf("kernel : %s\n", get_kernel());
+    // // char **b = get_cpu_use();
+    // // for (int i = 0; i < CPU_USE_COUNT; i++)
+    // //     printf("%s ", b[i]);
+    // printf("mem : %f\n", get_memory_use());
+    // printf("all pr : %d\n", get_all_process_number());
+    // printf("run pr : %d\n", get_run_process_number());
+    // printf("Up time %s\n", format_time(get_up_time()));
 
-    printf("jiffies   : %ld\n", get_jiffies());
-    printf("jiffies i : %ld\n", get_idle_jiffies());
-    printf("jiffies a : %ld\n", get_active_jiffies());
-    printf("jiffies p : %ld\n", get_active_jiffies_proc(1));
+    // printf("jiffies   : %ld\n", get_jiffies());
+    // printf("jiffies i : %ld\n", get_idle_jiffies());
+    // printf("jiffies a : %ld\n", get_active_jiffies());
+    // printf("jiffies p : %ld\n", get_active_jiffies_proc(1));
+
+    struct cpu cpu = cpu_init();
+
+    printf("%f\n", cpu.use);
 
     return 0;
 }

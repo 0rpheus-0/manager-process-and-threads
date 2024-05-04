@@ -15,7 +15,7 @@ struct process
 
 float get_cpu_use_proc(int pid)
 {
-    return get_active_jiffies_proc(pid) / get_active_jiffies();
+    return (float)get_active_jiffies_proc(pid) / (float)get_active_jiffies();
 }
 
 struct process process_init(int pid)

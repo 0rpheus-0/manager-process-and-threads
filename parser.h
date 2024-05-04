@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 char *proc_dir = "/proc/";
+char *task_dir = "/task/";
 char *cmdline_file = "/cmdline";
 char *cpuinfo_file = "/cpuinfo";
 char *status_file = "/status";
@@ -203,12 +204,12 @@ long get_active_jiffies()
     return get_jiffies() - get_idle_jiffies();
 }
 
-long get_active_jiffies_proc(int pid)
+long get_active_jiffies_proc(int pid, char *dir)
 {
     char path[256];
     char num[7];
     sprintf(num, "%d", pid);
-    strcpy(path, proc_dir);
+    strcpy(path, dir);
     strcat(path, num);
     strcat(path, stat_file);
     FILE *file = fopen(path, "r");
@@ -223,6 +224,11 @@ long get_active_jiffies_proc(int pid)
     return strtol(utime, NULL, 10) + strtol(stime, NULL, 10);
 }
 
+float get_use_cpu()
+{
+    return (float)get_active_jiffies() / (float)get_jiffies();
+}
+
 //------------------------------------------------------------
 struct pids
 {
@@ -230,14 +236,14 @@ struct pids
     int pids_count;
 };
 
-struct pids get_pids()
+struct pids get_pids(char *dir)
 {
     struct pids pid_s =
         {.pids = NULL,
          .pids_count = 0};
-    DIR *dir = opendir(proc_dir);
+    DIR *dirent = opendir(dir);
     struct dirent **entries;
-    int count = scandir(proc_dir, &entries, NULL, NULL);
+    int count = scandir(dir, &entries, NULL, NULL);
     for (int i = 0; i < count; i++)
     {
         struct dirent *entry = entries[i];
@@ -252,19 +258,19 @@ struct pids get_pids()
     return pid_s;
 }
 
-char *get_uid(int pid)
+char *get_uid(int pid, char *dir)
 {
     char path[256];
     char num[7];
     sprintf(num, "%d", pid);
-    strcpy(path, proc_dir);
+    strcpy(path, dir);
     strcat(path, num);
     strcat(path, status_file);
     // printf("%s\n", path); // убрать
     return key_value_parser("Uid:", path);
 }
 
-char *get_user(int pid)
+char *get_user(int pid, char *dir)
 {
     char *user = NULL;
     char *user_res = NULL;
@@ -279,7 +285,7 @@ char *get_user(int pid)
         user = strtok(str, ":");
         strtok(NULL, ":");
         uid_temp = strtok(NULL, ":");
-        char *uid = get_uid(pid);
+        char *uid = get_uid(pid, dir);
         // printf("%s\t%s\t%s\n", user, uid_temp, uid);
         if (strcmp(uid_temp, uid) == 0)
         {
@@ -292,12 +298,12 @@ char *get_user(int pid)
     return user_res;
 }
 
-long get_ram(int pid)
+long get_ram(int pid, char *dir)
 {
     char path[256];
     char num[7];
     sprintf(num, "%d", pid);
-    strcpy(path, proc_dir);
+    strcpy(path, dir);
     strcat(path, num);
     strcat(path, status_file);
     // printf("%s\n", path); // убрать
@@ -306,13 +312,13 @@ long get_ram(int pid)
     return ram;
 }
 
-long get_time(int pid)
+long get_time(int pid, char *dir)
 {
     // long ticks = 0;
     char path[256];
     char num[7];
     sprintf(num, "%d", pid);
-    strcpy(path, proc_dir);
+    strcpy(path, dir);
     strcat(path, num);
     strcat(path, stat_file);
     FILE *file = fopen(path, "r");
@@ -328,13 +334,13 @@ long get_time(int pid)
     return ticks / sysconf(_SC_CLK_TCK);
 }
 
-char *get_command(int pid)
+char *get_command(int pid, char *dir)
 {
     // char *command = NULL;
     char path[256];
     char num[7];
     sprintf(num, "%d", pid);
-    strcpy(path, proc_dir);
+    strcpy(path, dir);
     strcat(path, num);
     strcat(path, cmdline_file);
     FILE *file = fopen(path, "r");
@@ -349,12 +355,12 @@ char *get_command(int pid)
     return command_res;
 }
 
-char *get_state(int pid)
+char *get_state(int pid, char *dir)
 {
     char path[256];
     char num[7];
     sprintf(num, "%d", pid);
-    strcpy(path, proc_dir);
+    strcpy(path, dir);
     strcat(path, num);
     strcat(path, status_file);
     // printf("%s\n", path); // убрать

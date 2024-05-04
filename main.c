@@ -33,13 +33,14 @@ int main()
     // char **b = get_cpu_use();
     // for (int i = 0; i < CPU_USE_COUNT; i++)
     //     printf("%s ", b[i]);
-
     printf("mem : %f\n", get_memory_use());
-
     printf("all pr : %d\n", get_all_process_number());
     printf("run pr : %d\n", get_run_process_number());
-
     printf("Up time %s\n", format_time(get_up_time()));
+
+    printf("jiffies   : %ld\n", get_jiffies());
+    printf("jiffies i : %ld\n", get_idle_jiffies());
+    printf("jiffies a : %ld\n", get_active_jiffies());
 
     return 0;
 }

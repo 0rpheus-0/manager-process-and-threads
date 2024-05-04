@@ -183,6 +183,27 @@ long get_up_time()
 }
 
 //------------------------------------------------------------
+long get_jiffies()
+{
+    char **jiffies = get_cpu_use();
+    long jiffies_n = 0;
+    for (int i = 0; i < CPU_USE_COUNT; i++)
+        jiffies_n += strtol(jiffies[i], NULL, 10);
+    return jiffies_n;
+}
+
+long get_idle_jiffies()
+{
+    char **jiffies = get_cpu_use();
+    return strtol(jiffies[3], NULL, 10) + strtol(jiffies[4], NULL, 10);
+}
+
+long get_active_jiffies()
+{
+    return get_jiffies() - get_idle_jiffies();
+}
+
+//------------------------------------------------------------
 struct pids
 {
     int *pids;

@@ -2,6 +2,7 @@
 #include "process.h"
 #include "parser.h"
 #include "thread.h"
+#include "display.h"
 
 int main()
 {
@@ -24,20 +25,20 @@ int main()
 
     // printf("gc %s\n", get_command(4483));
 
-    printf("aboba\n");
-    struct process proc = process_init(917);
-    printf("pid : %d\nuser : %s\ncmd : %s\ncpu : %f\nram : %ld\ntime : %ld\nstate %s\n",
-           proc.pid, proc.user, proc.command, proc.cpu_use, proc.ram, proc.time, proc.state);
-    for (int i = 0; i < proc.tids.pids_count; i++)
-    {
-        printf("%d ", proc.tids.pids[i]);
-    }
-    for (int i = 0; i < proc.tids.pids_count; i++)
-    {
-        struct thread thr = thread_init(proc.tids.pids[i], proc.pid);
-        printf("pid : %d\nuser : %s\ncmd : %s\ncpu : %f\nram : %ld\ntime : %ld\nstate %s\n",
-               thr.pid, thr.user, thr.command, thr.cpu_use, thr.ram, thr.time, thr.state);
-    }
+    // printf("aboba\n");
+    // struct process proc = process_init(917);
+    // printf("pid : %d\nuser : %s\ncmd : %s\ncpu : %f\nram : %ld\ntime : %ld\nstate %s\n",
+    //        proc.pid, proc.user, proc.command, proc.cpu_use, proc.ram, proc.time, proc.state);
+    // for (int i = 0; i < proc.tids.pids_count; i++)
+    // {
+    //     printf("%d ", proc.tids.pids[i]);
+    // }
+    // for (int i = 0; i < proc.tids.pids_count; i++)
+    // {
+    //     struct thread thr = thread_init(proc.tids.pids[i], proc.pid);
+    //     printf("pid : %d\nuser : %s\ncmd : %s\ncpu : %f\nram : %ld\ntime : %ld\nstate %s\n",
+    //            thr.pid, thr.user, thr.command, thr.cpu_use, thr.ram, thr.time, thr.state);
+    //}
     // printf("OS : %s\n", get_operaring_system());
     // printf("kernel : %s\n", get_kernel());
     // // char **b = get_cpu_use();

@@ -56,5 +56,7 @@ int main()
 
     // printf("%f\n", get_use_cpu());
 
+    struct system sys = system_init();
+    display(sys);
     return 0;
 }

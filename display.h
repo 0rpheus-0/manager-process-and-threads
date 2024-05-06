@@ -27,6 +27,7 @@ char *progress_bar(float percent)
 
 void display_system(struct system sys, WINDOW *window)
 {
+    // wbkgd(window, COLOR_PAIR(1));
     int field = 2;
     int inform = 11;
     mvwprintw(window, 1, field, "OS :");
@@ -50,16 +51,16 @@ void display_system(struct system sys, WINDOW *window)
 }
 void display_hat(WINDOW *window)
 {
-    wbkgd(window, COLOR_PAIR(3));
-    int row = 10;
-    int const pid_col = 0;
-    int const user_col = 10;
-    int const stat_col = 20;
-    int const cpu_col = 30;
-    int const ram_col = 40;
-    int const time_col = 50;
-    int const command_col = 60;
-    // wattron(window, COLOR_PAIR(3));
+    wattron(window, COLOR_PAIR(3));
+    int row = 0;
+    int width_col = 10;
+    int const pid_col = 2;
+    int const user_col = pid_col + width_col;
+    int const stat_col = user_col + width_col;
+    int const cpu_col = stat_col + width_col;
+    int const ram_col = cpu_col + width_col;
+    int const time_col = ram_col + width_col;
+    int const command_col = time_col + width_col;
     mvwprintw(window, row, pid_col, "PID");
     mvwprintw(window, row, user_col, "USER");
     mvwprintw(window, row, stat_col, "STATE");
@@ -67,8 +68,7 @@ void display_hat(WINDOW *window)
     mvwprintw(window, row, ram_col, "RAM[MB]");
     mvwprintw(window, row, time_col, "TIME+");
     mvwprintw(window, row, command_col, "COMMAND");
-    // wattroff(window, COLOR_PAIR(3));
-    wbkgd(window, COLOR_PAIR(1));
+    wattroff(window, COLOR_PAIR(3));
     wrefresh(window);
 }
 
@@ -83,19 +83,21 @@ void display(struct system sys)
     curs_set(0);
     cbreak();
     start_color();
-    init_pair(1, COLOR_BLUE, COLOR_BLACK);
-    init_pair(2, COLOR_GREEN, COLOR_BLACK);
-    init_pair(3, COLOR_WHITE, COLOR_GREEN);
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    init_pair(2, COLOR_BLUE, COLOR_BLACK);
+    init_pair(3, COLOR_GREEN, COLOR_BLACK);
+    init_pair(4, COLOR_BLACK, COLOR_GREEN);
     getmaxyx(stdscr, height, width);
 
     WINDOW *system_window = newwin(9, width - 1, 0, 0);
-    WINDOW *hat_window = newwin(18, width - 1, system_window->_maxy, 30);
+    WINDOW *hat_window = newwin(1, width - 1, system_window->_maxy + 1, 0);
 
     while (1)
     {
         sys = system_init();
+        // box(system_window, 0, 0);
         display_system(sys, system_window);
-        display_hat(system_window);
+        display_hat(hat_window);
         refresh();
         sleep(1);
     }

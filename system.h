@@ -20,7 +20,7 @@ struct system system_init()
 {
     struct system sys =
         {
-            .os = get_operaring_system(),
+            .os = get_operarting_system(),
             .kernel = get_kernel(),
             .cpu = get_use_cpu(),
             .mem = get_memory_use(),

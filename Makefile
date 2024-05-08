@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -W -Wall -Wno-unused-parameter -Wno-unused-variable -std=c11 -pedantic 
+CFLAGS = -W -Wall -Wno-unused-parameter -Wno-unused-variable -std=c11 -pedantic -g -g3
 .PHONY:clean
 
 all: main

@@ -10,7 +10,6 @@ struct thread
     long ram;
     long time;
     char *command;
-    char *state;
 };
 
 float get_cpu_use_thr(int tid, char *dir)
@@ -32,7 +31,6 @@ struct thread thread_init(int tid, int pid)
         .command = get_command(tid, path),
         .cpu_use = get_cpu_use_thr(tid, path),
         .ram = get_ram(tid, path),
-        .time = get_time(tid, path),
-        .state = get_state(tid, path)};
+        .time = get_time(tid, path)};
     return thr;
 }

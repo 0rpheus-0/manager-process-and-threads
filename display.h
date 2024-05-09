@@ -1,7 +1,7 @@
 #pragma once
 
 #include "system.h"
-#include "parser.h"
+// #include "parser.h"
 #include <curses.h>
 
 int width, height;
@@ -57,7 +57,7 @@ void display_hat(WINDOW *window)
     int width_col = 10;
     int const pid_col = 2;
     int const user_col = pid_col + width_col;
-    int const cpu_col = user_col + width_col;
+    int const cpu_col = user_col + width_col + 5;
     int const ram_col = cpu_col + width_col;
     int const time_col = ram_col + width_col;
     int const command_col = time_col + width_col;
@@ -76,23 +76,42 @@ void display_process(struct system sys, WINDOW *window)
     int width_col = 10;
     int const pid_col = 2;
     int const user_col = pid_col + width_col;
-    int const cpu_col = user_col + width_col;
+    int const cpu_col = user_col + width_col + 5;
     int const ram_col = cpu_col + width_col;
     int const time_col = ram_col + width_col;
     int const command_col = time_col + width_col;
-    // for (int i = 0; i < sys.procs.pids_count; i++)
-    for (int i = 0, j = 0; i < 200; i++)
+    for (int i = 0, j = 0; i < sys.procs.pids_count; i++)
+    // for (int i = 200, j = 0; i < 250; i++)
     {
         struct process pr = process_init(sys.procs.pids[i]);
-        if (pr.pid != -1)
+        if (pr.command != NULL)
         {
+            char *t = format_time(pr.time);
             mvwprintw(window, j, pid_col, "%d", pr.pid);
             mvwprintw(window, j, user_col, pr.user);
             mvwprintw(window, j, cpu_col, "%f", pr.cpu_use);
             mvwprintw(window, j, ram_col, "%ld", pr.ram);
-            mvwprintw(window, j, time_col, format_time(pr.time));
+            mvwprintw(window, j, time_col, t);
             mvwprintw(window, j++, command_col, pr.command);
+            free(t);
+
+            for (int k = 0; k < pr.tids.pids_count; k++)
+            {
+                struct thread th = thread_init(pr.tids.pids[k], pr.pid);
+                char *t = format_time(pr.time);
+                mvwprintw(window, j, pid_col, "%d", th.pid);
+                mvwprintw(window, j, user_col, th.user);
+                mvwprintw(window, j, cpu_col, "%f", th.cpu_use);
+                mvwprintw(window, j, ram_col, "%ld", th.ram);
+                mvwprintw(window, j, time_col, t);
+                wattron(window, COLOR_PAIR(4));
+                mvwprintw(window, j++, command_col + 1, th.command);
+                wattroff(window, COLOR_PAIR(4));
+                free(t);
+                thread_free(th);
+            }
         }
+        process_free(pr);
     }
     wrefresh(window);
 }
@@ -107,7 +126,7 @@ void display(struct system sys)
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     init_pair(2, COLOR_BLUE, COLOR_BLACK);
     init_pair(3, COLOR_GREEN, COLOR_BLACK);
-    init_pair(4, COLOR_BLACK, COLOR_GREEN);
+    init_pair(4, COLOR_YELLOW, COLOR_BLACK);
     getmaxyx(stdscr, height, width);
 
     WINDOW *system_window = newwin(9, width - 1, 0, 0);
@@ -125,6 +144,7 @@ void display(struct system sys)
         display_process(sys, process_window);
         // box(process_window, 0, 0);
         refresh();
+        system_free(sys);
         sleep(1);
     }
     endwin();

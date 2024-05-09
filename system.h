@@ -3,6 +3,7 @@
 #include "process.h"
 #include "parser.h"
 #include "thread.h"
+#include <stdlib.h>
 
 struct system
 {
@@ -27,6 +28,12 @@ struct system system_init()
             .uptime = get_up_time(),
             .all_proc = get_all_process_number(),
             .run_proc = get_run_process_number(),
-            .procs = get_pids(proc_dir)};
+            .procs = get_pids(proc_dir1)};
     return sys;
+}
+void system_free(struct system sys)
+{
+    free(sys.os);
+    free(sys.kernel);
+    free(sys.procs.pids);
 }

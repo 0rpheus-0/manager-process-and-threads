@@ -1,6 +1,7 @@
 #pragma once
 
 #include "parser.h"
+#include <string.h>
 
 struct thread
 {
@@ -20,11 +21,7 @@ float get_cpu_use_thr(int tid, char *dir)
 struct thread thread_init(int tid, int pid)
 {
     char path[256];
-    char num[7];
-    sprintf(num, "%d", pid);
-    strcpy(path, proc_dir);
-    strcat(path, num);
-    strcat(path, task_dir);
+    sprintf(path, "%s%d%s", proc_dir1, pid, task_dir1);
     struct thread thr = {
         .pid = tid,
         .user = get_user(tid, path),
@@ -33,4 +30,11 @@ struct thread thread_init(int tid, int pid)
         .ram = get_ram(tid, path),
         .time = get_time(tid, path)};
     return thr;
+}
+void thread_free(struct thread th)
+{
+    if (th.user != NULL)
+        free(th.user);
+    if (th.command != NULL)
+        free(th.command);
 }

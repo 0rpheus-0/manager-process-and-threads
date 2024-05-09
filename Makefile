@@ -8,7 +8,7 @@ run: main
 	./main
 
 main: main.c Makefile
-	$(CC) $(CFLAGS) main.c -o main -lncurses
+	$(CC) $(CFLAGS) parser.c main.c -o main -lncurses
 
 clean:
 	rm -f main

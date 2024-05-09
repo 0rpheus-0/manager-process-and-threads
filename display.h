@@ -3,8 +3,15 @@
 #include "system.h"
 // #include "parser.h"
 #include <curses.h>
+#include <pthread.h>
 
+struct system sys;
 int width, height;
+WINDOW *system_window;
+WINDOW *hat_window;
+WINDOW *process_window;
+int ch;
+int thread_flag = 0;
 
 char *progress_bar(float percent)
 {
@@ -26,7 +33,7 @@ char *progress_bar(float percent)
     return result;
 }
 
-void display_system(struct system sys, WINDOW *window)
+void display_system(WINDOW *window)
 {
     // wbkgd(window, COLOR_PAIR(1));
     int field = 2;
@@ -52,6 +59,7 @@ void display_system(struct system sys, WINDOW *window)
 }
 void display_hat(WINDOW *window)
 {
+    werase(window);
     wattron(window, COLOR_PAIR(3));
     int row = 0;
     int width_col = 10;
@@ -71,7 +79,7 @@ void display_hat(WINDOW *window)
     wrefresh(window);
 }
 
-void display_process(struct system sys, WINDOW *window)
+void display_process(WINDOW *window)
 {
     int width_col = 10;
     int const pid_col = 2;
@@ -94,29 +102,84 @@ void display_process(struct system sys, WINDOW *window)
             mvwprintw(window, j, time_col, t);
             mvwprintw(window, j++, command_col, pr.command);
             free(t);
-
-            for (int k = 0; k < pr.tids.pids_count; k++)
+            if (thread_flag)
             {
-                struct thread th = thread_init(pr.tids.pids[k], pr.pid);
-                char *t = format_time(pr.time);
-                mvwprintw(window, j, pid_col, "%d", th.pid);
-                mvwprintw(window, j, user_col, th.user);
-                mvwprintw(window, j, cpu_col, "%f", th.cpu_use);
-                mvwprintw(window, j, ram_col, "%ld", th.ram);
-                mvwprintw(window, j, time_col, t);
-                wattron(window, COLOR_PAIR(4));
-                mvwprintw(window, j++, command_col + 1, th.command);
-                wattroff(window, COLOR_PAIR(4));
-                free(t);
-                thread_free(th);
+                for (int k = 0; k < pr.tids.pids_count; k++)
+                {
+                    struct thread th = thread_init(pr.tids.pids[k], pr.pid);
+                    char *t = format_time(pr.time);
+
+                    mvwprintw(window, j, pid_col, "%d", th.pid);
+                    mvwprintw(window, j, user_col, th.user);
+                    mvwprintw(window, j, cpu_col, "%f", th.cpu_use);
+                    mvwprintw(window, j, ram_col, "%ld", th.ram);
+                    mvwprintw(window, j, time_col, t);
+                    wattron(window, COLOR_PAIR(4));
+                    mvwprintw(window, j++, command_col + 1, th.command);
+                    wattroff(window, COLOR_PAIR(4));
+                    free(t);
+                    thread_free(th);
+                }
             }
         }
         process_free(pr);
     }
     wrefresh(window);
 }
+void update_window()
+{
+    getmaxyx(stdscr, height, width);
 
-void display(struct system sys)
+    system_window = newwin(9, width - 1, 0, 0);
+    hat_window = newwin(1, width - 1, system_window->_maxy + 1, 0);
+    process_window = newwin(100, width - 1, system_window->_maxy + 2, 0);
+    scrollok(process_window, TRUE);
+
+    while (1)
+    {
+        sys = system_init();
+        // box(system_window, 0, 0);
+        display_system(system_window);
+        display_hat(hat_window);
+        box(system_window, 0, 0);
+
+        display_process(process_window);
+        // box(process_window, 0, 0);
+        // refresh();
+        system_free(sys);
+        usleep(500000);
+    }
+}
+
+void button()
+{
+    while ((ch = getch()) != 'q')
+    {
+        if (ch == 'h')
+        {
+            if (thread_flag == 0)
+                thread_flag = 1;
+            else
+                thread_flag = 0;
+        }
+        else if (ch == KEY_DOWN)
+        {
+            wscrl(process_window, 3);
+        }
+        else if (ch == KEY_UP)
+        {
+            wscrl(process_window, 3);
+        }
+    }
+    pthread_testcancel();
+    system_free(sys);
+    delwin(system_window);
+    delwin(process_window);
+    endwin();
+    exit(0);
+}
+
+void display()
 {
     initscr();
     noecho();
@@ -127,25 +190,11 @@ void display(struct system sys)
     init_pair(2, COLOR_BLUE, COLOR_BLACK);
     init_pair(3, COLOR_GREEN, COLOR_BLACK);
     init_pair(4, COLOR_YELLOW, COLOR_BLACK);
-    getmaxyx(stdscr, height, width);
-
-    WINDOW *system_window = newwin(9, width - 1, 0, 0);
-    WINDOW *hat_window = newwin(1, width - 1, system_window->_maxy + 1, 0);
-    WINDOW *process_window = newwin(100, width - 1, system_window->_maxy + 2, 0);
-
-    while (1)
-    {
-        sys = system_init();
-        // box(system_window, 0, 0);
-        display_system(sys, system_window);
-        display_hat(hat_window);
-        box(system_window, 0, 0);
-
-        display_process(sys, process_window);
-        // box(process_window, 0, 0);
-        refresh();
-        system_free(sys);
-        sleep(1);
-    }
+    keypad(stdscr, TRUE);
+    pthread_t but;
+    pthread_create(&but, NULL, button, NULL);
+    update_window();
+    pthread_cancel(but);
+    pthread_join(but, NULL);
     endwin();
 }

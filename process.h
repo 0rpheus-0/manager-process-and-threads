@@ -62,7 +62,7 @@ struct process process_init(int pid)
 }
 void process_free(struct process proc)
 {
-    // printf("free p\n");
+    printf("free p\n");
     // printf("%s ", proc.user);
     // printf("%s ", proc.command);
     // for (int j = 0; j < proc.tids.pids_count; j++)

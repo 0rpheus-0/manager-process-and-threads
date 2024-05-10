@@ -48,7 +48,7 @@ char *key_value_parser(char *key, char *path)
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
-        printf("Error open %s  : %s\n", path, strerror(errno));
+        // printf("Error open %s  : %s\n", path, strerror(errno));
         return NULL;
     }
     // printf("kv\n");
@@ -94,7 +94,7 @@ char *get_operarting_system()
     FILE *file = fopen(os_path, "r");
     if (file == NULL)
     {
-        printf("Error open %s  : %s\n", os_path, strerror(errno));
+        // printf("Error open %s  : %s\n", os_path, strerror(errno));
         return NULL;
     }
     while (!feof(file))
@@ -123,7 +123,7 @@ char *get_kernel()
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
-        printf("Error open %s  : %s\n", path, strerror(errno));
+        // printf("Error open %s  : %s\n", path, strerror(errno));
         return NULL;
     }
     char str[256] = {0};
@@ -142,8 +142,6 @@ char *get_kernel()
 long *get_cpu_use()
 {
     // printf("gcu 0 \n");
-    //   char **cpu = (char **)malloc(CPU_USE_COUNT * sizeof(char *));
-    //   //char **cpu_res = (char **)malloc(CPU_USE_COUNT * sizeof(char *));
     char *cpu = NULL;
     long *cpu_res = (long *)malloc(CPU_USE_COUNT * sizeof(long));
     char path[256];
@@ -151,7 +149,7 @@ long *get_cpu_use()
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
-        printf("Error open %s  : %s\n", path, strerror(errno));
+        // printf("Error open %s  : %s\n", path, strerror(errno));
         return NULL;
     }
     char str[256] = {0};
@@ -159,34 +157,25 @@ long *get_cpu_use()
     strtok(str, " ");
     for (int i = 0; i < CPU_USE_COUNT; i++)
     {
-        // printf("gcu lo \n");
         cpu = strtok(NULL, " ");
         cpu_res[i] = strtol(cpu, NULL, 10);
     }
     fclose(file);
-    // printf("gcu ");
-    // for (int i = 0; i < CPU_USE_COUNT; i++)
-    // {
-    //     printf("%ld ", cpu_res[i]);
-    // }
-    // printf("\n");
-    // free(cpu);
     return cpu_res;
 }
 
 float get_memory_use()
 {
     // printf("mem\n");
-    //  char **mem_strs = (char **)malloc(2 * sizeof(char *));
+
     char *mem_str = NULL;
     float *mem = (float *)malloc(2 * sizeof(float));
-    //  char **mem_strs_res = (char **)malloc(2 * sizeof(char *));
     char path[256];
     sprintf(path, "%s%s", proc_dir, meminfo_file);
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
-        printf("Error open %s  : %s\n", path, strerror(errno));
+        // printf("Error open %s  : %s\n", path, strerror(errno));
         return 0.0;
     }
     for (int i = 0; i < 2; i++)
@@ -197,10 +186,8 @@ float get_memory_use()
         strtok(str, " \t");
         mem_str = strtok(NULL, " \t");
         mem[i] = atof(mem_str);
-        // printf("%s\n", mem_strs[i]);
     }
     fclose(file);
-    // printf("%f\t%f\n", mem[0], mem[1]);
     float mem_total = mem[0];
     float mem_free = mem[1];
     free(mem);
@@ -237,7 +224,7 @@ long get_up_time()
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
-        printf("Error open %s  : %s\n", path, strerror(errno));
+        // printf("Error open %s  : %s\n", path, strerror(errno));
         return 0;
     }
     char str[256] = {0};
@@ -280,11 +267,10 @@ long get_active_jiffies_proc(int pid, char *dir)
     // printf("gajp\n");
     char path[256];
     sprintf(path, "%s%d%s", dir, pid, stat_file);
-    // printf("%s\n", path);
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
-        printf("Error open %s  : %s\n", path, strerror(errno));
+        // printf("Error open %s  : %s\n", path, strerror(errno));
         return 0;
     }
     char str[256] = {0};
@@ -294,7 +280,6 @@ long get_active_jiffies_proc(int pid, char *dir)
         strtok(NULL, " ");
     char *utime = strtok(NULL, " ");
     char *stime = strtok(NULL, " ");
-    // printf("%s\t%s\n", utime, stime);
     fclose(file);
     return strtol(utime, NULL, 10) + strtol(stime, NULL, 10);
 }
@@ -316,29 +301,18 @@ struct pids get_pids(char *dir)
     struct dirent **entries;
     int count = scandir(dir, &entries, NULL, NULL);
     if (count < 0)
-        printf("Error scan dir %S\n", dir);
-    // for (int i = 0; i < count; i++)
-    // {
-    //     printf("I %d N %s ", i, entries[i]->d_name);
-    // }
-    // printf("\npids %s cou %d\n", dir, count);
+        ;
+    // printf("Error scan dir %S\n", dir);
     for (int i = 0; i < count; i++)
     {
-        // printf("I %d N %s ", i, entries[i]->d_name);
         int pid = atoi(entries[i]->d_name);
         if (pid != 0)
         {
-            // printf("PID : %d\n", pid);
             pid_s.pids = realloc(pid_s.pids, sizeof(int) * ++pid_s.pids_count);
             pid_s.pids[pid_s.pids_count - 1] = pid;
-            // printf("Coun %d\n", pid_s.pids_count);
         }
         free(entries[i]);
     }
-    // printf("\n in f ");
-    // for (int i = 0; i < pid_s.pids_count; i++)
-    //     printf("%d ", pid_s.pids[i]);
-    // printf("\n");
     free(entries);
     closedir(direct);
     // printf("pids e\n");
@@ -349,7 +323,6 @@ char *get_uid(int pid, char *dir)
 {
     char path[256];
     sprintf(path, "%s%d%s", dir, pid, status_file);
-    // printf("%s\n", path); // убрать
     return key_value_parser("Uid:", path);
 }
 
@@ -368,7 +341,7 @@ char *get_user(int pid, char *dir)
     }
     if (!uid)
     {
-        printf("user null\n");
+        // printf("user null\n");
         return NULL;
     }
     // printf("user\n");
@@ -379,8 +352,6 @@ char *get_user(int pid, char *dir)
         user = strtok(str, ":");
         strtok(NULL, ":");
         uid_temp = strtok(NULL, ":");
-        // char *uid = get_uid(pid, dir);
-        // printf("%s\t%s\t%s\n", user, uid_temp, uid);
         if (strcmp(uid_temp, uid) == 0)
         {
             user_res = (char *)malloc(strlen(user));
@@ -399,60 +370,53 @@ long get_ram(int pid, char *dir)
     // printf("ram\n");
     char path[256];
     sprintf(path, "%s%d%s", dir, pid, status_file);
-    // printf("ram %s\n", path); // убрать
     char *ram_str = key_value_parser("VmSize:", path);
-    // printf("ram %s\n", ram_str);
     if (ram_str == NULL)
         return 0;
     long ram = strtol(ram_str, NULL, 10) / 1000;
     free(ram_str);
-    // printf("ram e\n");
     return ram;
 }
 
 long get_time(int pid, char *dir)
 {
     // printf("time\n");
-    //    long ticks = 0;
     char path[256];
     sprintf(path, "%s%d%s", dir, pid, stat_file);
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
-        printf("Error open %s  : %s\n", path, strerror(errno));
+        // printf("Error open %s  : %s\n", path, strerror(errno));
         return 0;
     }
     char str[256] = {0};
     fgets(str, sizeof(str), file);
-    // printf("%s", str);
     strtok(str, " ");
-    for (int i = 0; i < 21; i++)
+    for (int i = 0; i < 12; i++)
         strtok(NULL, " ");
-    char *ticks_str = strtok(NULL, " ");
+    char *utime_str = strtok(NULL, " ");
+    long utime = strtol(utime_str, NULL, 10);
+    char *stime_str = strtok(NULL, " ");
+    long stime = strtol(stime_str, NULL, 10);
     fclose(file);
-    long ticks = strtol(ticks_str, NULL, 10);
-    // free(ticks_str);
-    return ticks / 100;
+    return (utime + stime) / 100;
 }
 
 char *get_command(int pid, char *dir)
 {
     // printf("cmd\n");
-    //     char *command = NULL;
     char path[256];
     sprintf(path, "%s%d%s", dir, pid, cmdline_file);
     FILE *file = fopen(path, "r");
     if (file == NULL)
     {
-        printf("Error open %s  : %s\n", path, strerror(errno));
+        // printf("Error open %s  : %s\n", path, strerror(errno));
         return NULL;
     }
     char str[256] = {0};
     fgets(str, sizeof(str), file);
     char *command = strtok(str, " \n");
     fclose(file);
-    // printf("cmd 2\n");
-    // printf("cmd %s\n", command);
     if (command == NULL)
         return NULL;
     char *command_res = (char *)malloc(strlen(command) + 1);

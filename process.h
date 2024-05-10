@@ -55,19 +55,16 @@ struct process process_init(int pid)
         .time = get_time(pid, proc_dir1),
         .tids = get_pids(path)};
 
-    // for (int j = 0; j < proc.tids.pids_count; j++)
-    //     printf("%d ", proc.tids.pids[j]);
-    // printf("\n");
     return proc;
 }
 void process_free(struct process proc)
 {
-    printf("free p\n");
-    // printf("%s ", proc.user);
-    // printf("%s ", proc.command);
-    // for (int j = 0; j < proc.tids.pids_count; j++)
-    //     printf("%d ", proc.tids.pids[j]);
-    // printf("\n");
+    // printf("free p\n");
+    //  printf("%s ", proc.user);
+    //  printf("%s ", proc.command);
+    //  for (int j = 0; j < proc.tids.pids_count; j++)
+    //      printf("%d ", proc.tids.pids[j]);
+    //  printf("\n");
     if (proc.user != NULL)
         free(proc.user);
     if (proc.command != NULL)

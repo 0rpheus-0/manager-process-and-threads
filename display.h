@@ -1,7 +1,6 @@
 #pragma once
 
 #include "system.h"
-// #include "parser.h"
 #include <curses.h>
 #include <pthread.h>
 
@@ -37,7 +36,6 @@ char *progress_bar(float percent)
 
 void display_system(WINDOW *window)
 {
-    // wbkgd(window, COLOR_PAIR(1));
     int field = 2;
     int inform = 11;
     mvwprintw(window, 1, field, "OS :");
@@ -90,8 +88,6 @@ void display_process(WINDOW *window)
     int const ram_col = cpu_col + width_col;
     int const time_col = ram_col + width_col;
     int const command_col = time_col + width_col;
-
-    // for (int k = first_proc, j = 0, i = 0;  k < height - 10 && k + j < sys.procs.pids_count;)
     pthread_mutex_lock(&mutex);
     for (int i = first_proc, l = 0; i < sys.procs.pids_count - 1 && l < height - 10; i++)
     {
@@ -131,45 +127,6 @@ void display_process(WINDOW *window)
         process_free(pr);
     }
     pthread_mutex_unlock(&mutex);
-    // for (int i = 0, j = 0; i < sys.procs.pids_count; i++)
-    // // for (int i = 200, j = 0; i < 250; i++)
-    // {
-    //     struct process pr = process_init(sys.procs.pids[i]);
-    //     if (pr.command != NULL)
-    //     {
-    //         char *t = format_time(pr.time);
-    //         mvwprintw(window, j, pid_col, "%d", pr.pid);
-    //         // mvwprintw(window, j, user_col, "          ");
-    //         mvwprintw(window, j, user_col, pr.user);
-    //         mvwprintw(window, j, cpu_col, "%f", pr.cpu_use);
-    //         mvwprintw(window, j, ram_col, "%ld", pr.ram);
-    //         mvwprintw(window, j, time_col, t);
-    //         // mvwprintw(window, j, command_col, "                                                                    ");
-    //         mvwprintw(window, j++, command_col, pr.command);
-    //         free(t);
-    //         if (thread_flag)
-    //         {
-    //             for (int k = 0; k < pr.tids.pids_count; k++)
-    //             {
-    //                 struct thread th = thread_init(pr.tids.pids[k], pr.pid);
-    //                 char *t = format_time(pr.time);
-    //                 mvwprintw(window, j, pid_col, "%d", th.pid);
-    //                 // mvwprintw(window, j, user_col, "          ");
-    //                 mvwprintw(window, j, user_col, th.user);
-    //                 mvwprintw(window, j, cpu_col, "%f", th.cpu_use);
-    //                 mvwprintw(window, j, ram_col, "%ld", th.ram);
-    //                 mvwprintw(window, j, time_col, t);
-    //                 wattron(window, COLOR_PAIR(4));
-    //                 // mvwprintw(window, j, command_col, "                                                                    ");
-    //                 mvwprintw(window, j++, command_col + 1, th.command);
-    //                 wattroff(window, COLOR_PAIR(4));
-    //                 free(t);
-    //                 thread_free(th);
-    //             }
-    //         }
-    //     }
-    //     process_free(pr);
-    // }
     wrefresh(window);
 }
 void update_window()
@@ -184,22 +141,14 @@ void update_window()
     while (1)
     {
         sys = system_init();
-        // box(system_window, 0, 0);
         display_system(system_window);
         display_hat(hat_window);
         box(system_window, 0, 0);
         display_process(process_window);
-        // box(process_window, 0, 0);
-        // refresh();
         system_free(sys);
         usleep(250000);
     }
 }
-
-// void scrol(int num)
-// {
-//     first_proc + num =
-// }
 
 void button()
 {
@@ -248,7 +197,6 @@ void button()
             pthread_mutex_unlock(&mutex);
         }
     }
-    // system_free(sys);
     pthread_mutex_destroy(&mutex);
     endwin();
     exit(0);

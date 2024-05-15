@@ -12,7 +12,7 @@ WINDOW *process_window;
 int thread_flag = 0;
 int first_proc = 0;
 pthread_mutex_t mutex;
-char *spase = "                                                                                                                                                  ";
+char *spase = "                                                                                                                                                      ";
 
 char *progress_bar(float percent)
 {
@@ -167,13 +167,21 @@ void button()
             pthread_mutex_lock(&mutex);
             first_proc++;
             if (first_proc >= sys.procs.pids_count)
+            {
                 first_proc = sys.procs.pids_count - 1;
+                pthread_mutex_unlock(&mutex);
+                continue;
+            }
             struct process proc = process_init(sys.procs.pids[first_proc]);
             while (!proc.command)
             {
                 first_proc++;
                 if (first_proc >= sys.procs.pids_count)
+                {
                     first_proc = sys.procs.pids_count - 1;
+                    pthread_mutex_unlock(&mutex);
+                    break;
+                }
                 proc = process_init(sys.procs.pids[first_proc]);
             }
             process_free(proc);
@@ -181,19 +189,41 @@ void button()
         }
         else if (ch == KEY_UP)
         {
+            struct process proc;
             pthread_mutex_lock(&mutex);
-            first_proc--;
-            if (first_proc <= 0)
-                first_proc = 0;
-            struct process proc = process_init(sys.procs.pids[first_proc]);
-            while (!proc.command)
+            while (1)
             {
                 first_proc--;
                 if (first_proc <= 0)
                     first_proc = 0;
                 proc = process_init(sys.procs.pids[first_proc]);
+                if (proc.command)
+                {
+                    process_free(proc);
+                    break;
+                }
+                process_free(proc);
             }
-            process_free(proc);
+            // first_proc--;
+            // if (first_proc <= 0)
+            // {
+            //     first_proc = 0;
+            //     pthread_mutex_unlock(&mutex);
+            //     continue;
+            // }
+            // struct process proc = process_init(sys.procs.pids[first_proc]);
+            // while (!proc.command)
+            // {
+            //     first_proc--;
+            //     if (first_proc <= 0)
+            //     {
+            //         first_proc = 0;
+            //         pthread_mutex_unlock(&mutex);
+            //         break;
+            //     }
+            //     proc = process_init(sys.procs.pids[first_proc]);
+            // }
+            // process_free(proc);
             pthread_mutex_unlock(&mutex);
         }
     }

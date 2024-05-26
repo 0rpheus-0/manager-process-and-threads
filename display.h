@@ -1,8 +1,8 @@
 #pragma once
-
 #include "system.h"
 #include <curses.h>
 #include <pthread.h>
+#include <unistd.h>
 
 struct system sys;
 int width, height;
@@ -11,7 +11,8 @@ WINDOW *hat_window;
 WINDOW *process_window;
 int thread_flag = 0;
 int first_proc = 0;
-pthread_mutex_t mutex;
+pthread_mutex_t mutex_proc;
+pthread_mutex_t mutex_sys;
 char *spase = "                                                                                                                                                      ";
 
 char *progress_bar(float percent)
@@ -46,14 +47,14 @@ void display_system(WINDOW *window)
     mvwprintw(window, 6, field, "Running Processes : ");
     mvwprintw(window, 7, field, "Up Time: ");
     wattron(window, COLOR_PAIR(2));
-    mvwprintw(window, 1, inform, sys.os);
-    mvwprintw(window, 2, inform, sys.kernel);
-    mvwprintw(window, 3, inform, progress_bar(sys.cpu));
-    mvwprintw(window, 4, inform, progress_bar(sys.mem));
+    mvwprintw(window, 1, inform, "%s", sys.os);
+    mvwprintw(window, 2, inform, "%s", sys.kernel);
+    mvwprintw(window, 3, inform, "%s", progress_bar(sys.cpu));
+    mvwprintw(window, 4, inform, "%s", progress_bar(sys.mem));
     inform += 12;
     mvwprintw(window, 5, inform, "%d", sys.all_proc);
     mvwprintw(window, 6, inform, "%d", sys.run_proc);
-    mvwprintw(window, 7, inform, format_time(sys.uptime));
+    mvwprintw(window, 7, inform, "%s", format_time(sys.uptime));
     wattroff(window, COLOR_PAIR(2));
     wrefresh(window);
 }
@@ -88,20 +89,20 @@ void display_process(WINDOW *window)
     int const ram_col = cpu_col + width_col;
     int const time_col = ram_col + width_col;
     int const command_col = time_col + width_col;
-    pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex_proc);
     for (int i = first_proc, l = 0; i < sys.procs.pids_count - 1 && l < height - 10; i++)
     {
         struct process pr = process_init(sys.procs.pids[i]);
         if (pr.command)
         {
             char *t = format_time(pr.time);
-            mvwprintw(window, l, 0, spase);
+            mvwprintw(window, l, 0, "%s", spase);
             mvwprintw(window, l, pid_col, "%d", pr.pid);
-            mvwprintw(window, l, user_col, pr.user);
+            mvwprintw(window, l, user_col, "%s", pr.user);
             mvwprintw(window, l, cpu_col, "%f", pr.cpu_use);
             mvwprintw(window, l, ram_col, "%ld", pr.ram);
-            mvwprintw(window, l, time_col, t);
-            mvwprintw(window, l++, command_col, pr.command);
+            mvwprintw(window, l, time_col, "%s", t);
+            mvwprintw(window, l++, command_col, "%s", pr.command);
             free(t);
 
             if (thread_flag)
@@ -109,14 +110,14 @@ void display_process(WINDOW *window)
                 {
                     struct thread th = thread_init(pr.tids.pids[k], pr.pid);
                     char *t = format_time(pr.time);
-                    mvwprintw(window, l, 0, spase);
+                    mvwprintw(window, l, 0, "%s", spase);
                     wattron(window, COLOR_PAIR(4));
                     mvwprintw(window, l, pid_col, "%d", th.pid);
                     wattroff(window, COLOR_PAIR(4));
-                    mvwprintw(window, l, user_col, th.user);
+                    mvwprintw(window, l, user_col, "%s", th.user);
                     mvwprintw(window, l, cpu_col, "%f", th.cpu_use);
                     mvwprintw(window, l, ram_col, "%ld", th.ram);
-                    mvwprintw(window, l, time_col, t);
+                    mvwprintw(window, l, time_col, "%s", t);
                     wattron(window, COLOR_PAIR(4));
                     mvwprintw(window, l++, command_col + 1, "`~> %s", th.command);
                     wattroff(window, COLOR_PAIR(4));
@@ -126,7 +127,7 @@ void display_process(WINDOW *window)
         }
         process_free(pr);
     }
-    pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&mutex_proc);
     wrefresh(window);
 }
 void update_window()
@@ -140,17 +141,19 @@ void update_window()
 
     while (1)
     {
+        pthread_mutex_lock(&mutex_sys);
         sys = system_init();
         display_system(system_window);
         display_hat(hat_window);
         box(system_window, 0, 0);
         display_process(process_window);
         system_free(sys);
+        pthread_mutex_unlock(&mutex_sys);
         usleep(250000);
     }
 }
 
-void button()
+void *button(void *arg)
 {
     int ch;
     while ((ch = getch()) != 'q')
@@ -164,33 +167,29 @@ void button()
         }
         else if (ch == KEY_DOWN)
         {
-            pthread_mutex_lock(&mutex);
-            first_proc++;
-            if (first_proc >= sys.procs.pids_count)
-            {
-                first_proc = sys.procs.pids_count - 1;
-                pthread_mutex_unlock(&mutex);
-                continue;
-            }
-            struct process proc = process_init(sys.procs.pids[first_proc]);
-            while (!proc.command)
+            struct process proc;
+            pthread_mutex_lock(&mutex_sys);
+            pthread_mutex_lock(&mutex_proc);
+            while (1)
             {
                 first_proc++;
-                if (first_proc >= sys.procs.pids_count)
-                {
+                if (first_proc >= sys.procs.pids_count - 1)
                     first_proc = sys.procs.pids_count - 1;
-                    pthread_mutex_unlock(&mutex);
+                proc = process_init(sys.procs.pids[first_proc]);
+                if (proc.command)
+                {
+                    process_free(proc);
                     break;
                 }
-                proc = process_init(sys.procs.pids[first_proc]);
+                process_free(proc);
             }
-            process_free(proc);
-            pthread_mutex_unlock(&mutex);
+            pthread_mutex_unlock(&mutex_proc);
+            pthread_mutex_unlock(&mutex_sys);
         }
         else if (ch == KEY_UP)
         {
             struct process proc;
-            pthread_mutex_lock(&mutex);
+            pthread_mutex_lock(&mutex_proc);
             while (1)
             {
                 first_proc--;
@@ -204,30 +203,10 @@ void button()
                 }
                 process_free(proc);
             }
-            // first_proc--;
-            // if (first_proc <= 0)
-            // {
-            //     first_proc = 0;
-            //     pthread_mutex_unlock(&mutex);
-            //     continue;
-            // }
-            // struct process proc = process_init(sys.procs.pids[first_proc]);
-            // while (!proc.command)
-            // {
-            //     first_proc--;
-            //     if (first_proc <= 0)
-            //     {
-            //         first_proc = 0;
-            //         pthread_mutex_unlock(&mutex);
-            //         break;
-            //     }
-            //     proc = process_init(sys.procs.pids[first_proc]);
-            // }
-            // process_free(proc);
-            pthread_mutex_unlock(&mutex);
+            pthread_mutex_unlock(&mutex_proc);
         }
     }
-    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&mutex_proc);
     endwin();
     exit(0);
 }
@@ -245,11 +224,13 @@ void display()
     init_pair(4, COLOR_YELLOW, COLOR_BLACK);
     keypad(stdscr, TRUE);
     pthread_t but;
-    pthread_mutex_init(&mutex, NULL);
+    pthread_mutex_init(&mutex_proc, NULL);
+    pthread_mutex_init(&mutex_sys, NULL);
     pthread_create(&but, NULL, button, NULL);
     update_window();
     pthread_cancel(but);
     pthread_join(but, NULL);
-    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&mutex_proc);
+    pthread_mutex_destroy(&mutex_sys);
     endwin();
 }

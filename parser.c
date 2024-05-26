@@ -283,8 +283,6 @@ struct pids get_pids(char *dir)
     DIR *direct = opendir(dir);
     struct dirent **entries;
     int count = scandir(dir, &entries, NULL, NULL);
-    if (count < 0)
-        ;
     // printf("Error scan dir %S\n", dir);
     for (int i = 0; i < count; i++)
     {

@@ -7,6 +7,7 @@
 
 int main()
 {
+    jiffies_init();
     display();
     return 0;
 }

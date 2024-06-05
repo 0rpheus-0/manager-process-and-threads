@@ -29,6 +29,7 @@ struct system system_init()
             .all_proc = get_all_process_number(),
             .run_proc = get_run_process_number(),
             .procs = get_pids(proc_dir1)};
+
     return sys;
 }
 void system_free(struct system sys)

@@ -6,25 +6,6 @@
 #include <string.h>
 #include <errno.h>
 
-// char *value_from_file(FILE *file, char *key) {
-//     const char *sep = " \t\n";
-//     char *value = NULL;
-//     char *value_res = NULL;
-//     while (!feof(file)) {
-//         char line[256] = {0};
-//         fgets(line, sizeof(line), file);
-//         if (strncmp(key, line, strlen(key)) == 0) {
-//             strtok(str, sep);
-//             value = strtok(NULL, sep);
-//             printf("%s %d\n", value, strlen(value));
-//             value_res = (char *)malloc(strlen(value));
-//             strcpy(value_res, value);
-// 	    break;
-//         }
-//     }
-//     return value_res;
-// }
-
 char *proc_dir = "/proc/";
 char *task_dir = "/task/";
 char *cmdline_file = "/cmdline";
@@ -36,6 +17,7 @@ char *os_path = "/etc/os-release";
 char *passwd_path = "/etc/passwd";
 char *version_file = "/version";
 char *meminfo_file = "/meminfo";
+float prev_active_jiffies, prev_get_jiffies;
 
 char *key_value_parser(char *key, char *path)
 {
@@ -268,9 +250,15 @@ long get_active_jiffies_proc(int pid, char *dir)
     return strtol(utime, NULL, 10) + strtol(stime, NULL, 10);
 }
 
+void jiffies_init()
+{
+    prev_active_jiffies = (float)get_active_jiffies();
+    prev_get_jiffies = (float)get_jiffies();
+};
+
 float get_use_cpu()
 {
-    return (float)get_active_jiffies() / (float)get_jiffies();
+    return (prev_active_jiffies - (float)get_active_jiffies()) / (prev_get_jiffies - (float)get_jiffies());
 }
 
 //------------------------------------------------------------

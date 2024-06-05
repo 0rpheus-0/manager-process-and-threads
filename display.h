@@ -149,7 +149,7 @@ void update_window()
         display_process(process_window);
         system_free(sys);
         pthread_mutex_unlock(&mutex_sys);
-        usleep(250000);
+        usleep(200000);
     }
 }
 
